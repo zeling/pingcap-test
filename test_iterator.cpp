@@ -145,7 +145,7 @@ TEST_CASE("merge sst", "[merge sst]") {
 }
 
 
-TEST_CASE("meger sst eqaul", "[merge sst spec]") {
+TEST_CASE("merge sst eqaul", "[merge sst spec]") {
     master::memtable_type result, memtables[3] = {
         {
             {"abc", 1},
