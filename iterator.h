@@ -5,36 +5,123 @@
 #include <vector>
 
 #include <stdio.h>
+#include <string.h>
 
 #include "entry.h"
 #include "heap.h"
 
-class sst_write_iter {
+// Base class for input file
+template <typename T, typename Derived>
+class input_file_iter {
 public:
-    using iterator_category = std::output_iterator_tag;
-    using value_type = entry<slice_url_t>;
-    using difference_type = ptrdiff_t;
-    using pointer = value_type *;
-    using reference = value_type &;
-
-};
-
-class sst_read_iter {
-public:
-    using iterator_category = std::output_iterator_tag;
-    using value_type = entry<slice_url_t>;
-    using difference_type = ptrdiff_t;
-    using pointer = value_type *;
-    using reference = value_type &;
-};
-
-class read_line_iter {
-public:
+    static constexpr size_t buf_size = 1024;
     using iterator_category = std::input_iterator_tag;
-    using value_type = std::string_view;
+    using value_type = T;
     using difference_type = ptrdiff_t;
     using pointer = value_type *;
     using reference = value_type &;
+
+    input_file_iter(FILE *input)
+        :_input(input) {
+        if (valid()) {
+            read_buffer();
+        }
+    }
+
+    value_type operator*() {
+        if (valid()) {
+            return construct_entry();
+        } else {
+            return {};
+        }
+    } 
+
+    value_type *operator->() {
+        new (&_e) value_type(construct_entry());
+        return &_e;
+    }
+
+    Derived &operator++() {
+        if (_input && !feof(_input)) {
+            read_buffer();
+        } else {
+            _cur_len = 0;
+        }
+        return *static_cast<Derived *>(this);
+    }
+
+    void read_buffer() {
+        _cur_len = static_cast<Derived *>(this)->read_buffer(_buf, buf_size, _input);
+    }
+
+    value_type construct_entry() {
+        return static_cast<Derived *>(this)->construct_entry(_buf, _cur_len);
+    }
+
+    bool valid() {
+        return _cur_len > 0 || (_input && !feof(_input));
+    }
+
+    void close() {
+        assert(_input);
+        assert(fclose(_input) == 0);
+        _input = nullptr;
+    }
+
+private:
+    FILE *_input;
+    char _buf[buf_size];
+    size_t _cur_len = 0;
+    value_type _e;
+};
+
+class sst_read_iter: public input_file_iter<entry<slice_url_t>, sst_read_iter> {
+public:
+    sst_read_iter(FILE *input)
+        : input_file_iter(input) {}
+
+    size_t read_buffer(char *buf, size_t size, FILE *input) {
+        size_t key_len;
+        if (fread(&key_len, sizeof(key_len), 1, input) != 1) {
+            return 0;
+        }
+        if (fread(buf, 1, key_len, input) != key_len) {
+            return 0;
+        }
+        if (fread(&_count, sizeof(_count), 1, input) != 1) {
+            return 0;
+        }
+        return key_len;
+    }
+
+    value_type construct_entry(char *buf, size_t size) {
+        return { slice_url_t(buf, size), _count };
+    }
+
+private:
+    count_t _count;
+};
+
+class read_line_iter : public input_file_iter<slice_url_t, read_line_iter> {
+public:
+    read_line_iter(FILE *input)
+        : input_file_iter(input) {}
+    
+    size_t read_buffer(char *buf, size_t size, FILE *input) {
+        do {
+            if (!fgets(buf, buf_size, input)) {
+                return 0;
+            }
+        } while (strncmp("\n", buf, 1) == 0);
+        return strlen(buf);
+    }
+
+    value_type construct_entry(char *buf, size_t size) {
+        if (size > 1 && buf[size-1] == '\n') {
+            --size;
+        }
+        return { buf, size };
+    }
 };
 
 namespace {
@@ -56,7 +143,9 @@ public:
     merge_iter(Iters begin, Iters end)
         :_iters(begin, end), _heap(end - begin) {
         for (auto &iter: _iters) {
-            _heap.add(&iter);
+            if (iter.valid()) {
+                _heap.add(&iter);
+            }
         }
     }
 
@@ -69,8 +158,12 @@ public:
         return *this;
     }
 
-    const value_type &operator*() {
+    value_type operator*() {
         return _heap.front().iter->operator*();
+    }
+
+    const value_type *operator->() {
+        return _heap.front().iter->operator->();
     }
 
     bool valid() {

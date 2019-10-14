@@ -7,6 +7,8 @@ struct entry {
     Url url;
     count_t count;
 
+    entry() = default;
+
     template <typename String>
     entry(String str, count_t c): url(str), count(c) {}
 

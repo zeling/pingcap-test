@@ -12,14 +12,20 @@ void new_handler() {
 
 constexpr rlim_t GB = 1'024 * 1'024 * 1'024;
 
-TEST_CASE("memusage_guard", "[memusage_guad spec]") {
+/* The following test will fail on WSL ... */
+TEST_CASE("memusage_guard", "[memusage_guad spec][!mayfail]") {
     SECTION("should be able to guard") {
-        memusage_guard g(1 * GB, new_handler);
-        if (setjmp(jbuf) == 0) {
-            char *buf = new char[2 * GB];
-            REQUIRE_FALSE(true);
-        } else {
-            REQUIRE_FALSE(false);
+        {
+            memusage_guard g(1 * GB, new_handler);
+            if (setjmp(jbuf) == 0) {
+                char *buf = new char[1 * GB];
+                // Absurd.
+                REQUIRE(1 == 2);
+            }
         }
+        char *buf;
+        REQUIRE_NOTHROW(buf = new char[1 * GB]);
+        REQUIRE(buf != nullptr);
+        delete[] buf;
     }
 }
