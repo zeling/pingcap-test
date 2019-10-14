@@ -1,5 +1,5 @@
 #pragma once
-#include <stddef.h>
+#include <memory>
 
 static size_t memory_usage;
 
