@@ -13,6 +13,9 @@ target_link_libraries(libtop100 Threads::Threads)
 add_executable(top100 main.cpp)
 target_link_libraries(top100 libtop100)
 
+add_executable(genzipf third_party/genzipf.c)
+target_link_libraries(genzipf m)
+
 add_executable(test_main test_main.cpp test_heap.cpp test_iterator.cpp test_memusage_guard.cpp test_memusage_allocator.cpp test_master.cpp)
 target_link_libraries(test_main Catch2::Catch2 libtop100)
 
