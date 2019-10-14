@@ -46,10 +46,9 @@ void master::start() {
     flush_memtable(i);
   }
   for (size_t shard = 0; shard < _n_shards; shard++) {
-    // spawn_worker([this, shard] {
-    //     this->merge_worker(shard);
-    // });
-    merge_worker(shard);
+    spawn_worker([this, shard] {
+        this->merge_worker(shard);
+    });
   }
 }
 
