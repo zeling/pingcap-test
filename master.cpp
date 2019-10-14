@@ -2,7 +2,9 @@
 #include "iterator.h"
 #include "memusage_allocator.h"
 #include <algorithm>
+#include <stdarg.h>
 
+void die(const char *fmt, ...);
 size_t get_entry_overhead();
 static std::string get_sst_filename(size_t shard, size_t epoch);
 
@@ -32,9 +34,8 @@ void master::start() {
   FILE *input = ::fopen(_input_file.c_str(), "r");
   if (!input) {
     // No reason to recover if I can't even open the input file
-    fprintf(stderr, "Cannot open the file: %s [%d %s]\n", _input_file.c_str(),
-            errno, strerror(errno));
-    std::abort();
+    die("Cannot open the file: %s [%d %s]\n", _input_file.c_str(), errno,
+        strerror(errno));
   }
   read_line_iter line(input);
   while (line.valid()) {
@@ -46,9 +47,7 @@ void master::start() {
     flush_memtable(i);
   }
   for (size_t shard = 0; shard < _n_shards; shard++) {
-    spawn_worker([this, shard] {
-        this->merge_worker(shard);
-    });
+    spawn_worker([this, shard] { this->merge_worker(shard); });
   }
 }
 
@@ -68,9 +67,8 @@ size_t master::flush_memtable(size_t shard) {
   auto filename = get_sst_filename(shard, _epochs[shard]);
   FILE *output = fopen(filename.c_str(), "w+b");
   if (!output) {
-    fprintf(stderr, "cannot write to sst file: %s, err: %s\n", filename.c_str(),
-            strerror(errno));
-    std::abort();
+    die("Cannot write to sst file: %s, err: %s\n", filename.c_str(),
+        strerror(errno));
   }
   write_sst(std::move(_memtables[shard]), output);
   // Adjust the memory usage estimation.
@@ -94,8 +92,7 @@ void master::merge_worker(size_t shard) {
     auto filename = get_sst_filename(shard, epoch);
     FILE *input = fopen(filename.c_str(), "rb");
     if (!input) {
-      fprintf(stderr, "Cannot open the staged sst: %s\n", filename.c_str());
-      std::abort();
+      die("Cannot open the staged sst: %s\n", filename.c_str());
     }
     iters.emplace_back(input);
   }
@@ -149,4 +146,12 @@ std::string get_sst_filename(size_t shard, size_t epoch) {
   /* filename schema: stage-(shard)-(epoch) */
   int n = snprintf(filename, filename_size, "stage-%lu-%lu.sst", shard, epoch);
   return {filename, (size_t)n};
+}
+
+void die(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  vfprintf(stderr, format, args);
+  va_end(args);
+  std::abort();
 }
