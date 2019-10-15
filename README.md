@@ -45,6 +45,35 @@ Finally we merge the results per shard to become the final result.
 
 This is correct because hashing guarantees that the same URL will not occur in two shards, each shard is independent to each other.
 
+For example, if shard0 has the following SST files:
+sst-0:
+```
+a -> 1
+b -> 3
+```
+sst-1:
+```
+b -> 4
+c -> 6
+```
+sst-2:
+```
+a -> 5
+c -> 2
+```
+
+Then the `merge_iter` will give us:
+```
+a -> 1
+a -> 5
+b -> 3
+b -> 4
+c -> 6
+c -> 2
+```
+
+Then it is trivial to first aggregate the keys and then use a minheap to find the top-k entries.
+
 
 ### Memory usage
 There two mechanisms to protect make sure the program respects the memory limit.
