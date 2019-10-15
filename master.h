@@ -9,6 +9,8 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include "entry.h"
 #include "heap.h"
@@ -34,11 +36,24 @@ public:
     assert(fscanf(statm, "%lu", &npage) == 1);
     _mem_usage = npage * getpagesize();
     assert(fclose(statm) == 0);
+    for (int i = 0; i < _n_shards; i++) {
+        char buf[4];
+        sprintf(buf, "_%d", i);
+        struct stat st = {0};
+        if (stat(buf, &st) == -1) {
+            mkdir(buf, 0700);
+        }
+    }
   }
 
   ~master() {
     /* Make sure when the master is dropped, all threads are waited */
     wait_for_all_workers();
+    for (int i = 0; i < _n_shards; i++) {
+        char buf[4];
+        sprintf(buf, "_%d", i);
+        rmdir(buf);
+    }
   }
 
   template <typename F> void spawn_worker(F &&f) {

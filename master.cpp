@@ -146,7 +146,7 @@ std::string get_sst_filename(size_t shard, size_t epoch) {
   constexpr size_t filename_size = 64;
   char filename[filename_size];
   /* filename schema: stage-(shard)-(epoch) */
-  int n = snprintf(filename, filename_size, "stage-%lu-%lu.sst", shard, epoch);
+  int n = snprintf(filename, filename_size, "_%lu/stage-%lu.sst", shard, epoch);
   return {filename, (size_t)n};
 }
 
