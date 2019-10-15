@@ -21,7 +21,7 @@ Either run `ctest` or `./test_main` in the `build/` folder.
 `./top100 [-l hard_limit] [-w water_mark] [-s shards] [-t top_k] inputfile`
 Both `hard_limit` and `water_mark` are in bytes, the former one is enforced by the OS, the program might abort if the memory requirement cannot be met.
 The later one is more flexible, it is only to tell the program to cooperatively flush memory to the disk when the `water_mark` is triggered. It is required
-that $water_mark < hard_limit$. `water_mark` has default of `0.9G` while `hard_limit` has default of `1G`. `shard` is the number of shards, defaults to `std::thread::hardware_concurrency()`; `top_k` is the top k URLs the user is interested in (defaults to 100). 
+that water_mark < hard_limit. `water_mark` has default of `0.9G` while `hard_limit` has default of `1G`. `shard` is the number of shards, defaults to `std::thread::hardware_concurrency()`; `top_k` is the top k URLs the user is interested in (defaults to 100). 
 
 ## Design
 
