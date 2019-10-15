@@ -13,7 +13,7 @@ constexpr rlim_t GB = 1'024 * 1'024 * 1'024;
 TEST_CASE("memusage_guard", "[memusage_guad spec][!mayfail]") {
   SECTION("should be able to guard") {
     {
-      memusage_guard g(1 * GB, new_handler);
+      memusage_guard<RLIMIT_AS> g(1 * GB, new_handler);
       if (setjmp(jbuf) == 0) {
         char *buf = new char[1 * GB];
         // Absurd.

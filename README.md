@@ -92,6 +92,6 @@ URLs, the file is in `third_party/genzipf.c`. You can use `build/genzipf` to gen
    assum the URL respects the zipf distribution, we can use bloom filters to skip SST files that definitely don't have the key. 
    But it will make the program extremely complicated and will increse the # of reads to the file system significantly. I don't think 
    this is a good idea but maybe worth trying if I have enough time.
-3. Currently, The resource is limited as `RLIMIT_AS`, may be consider `RLIMIT_RSS`?
+3. Currently, The resource is limited as `RLIMIT_AS`, may be consider `RLIMIT_RSS`? (Done as 0ae2e3e0286c93e2a143db28b856209eed802245)
 4. There will be lots of "sst_files" in the same directory, this will bring problems when there are a lot of files.
    May be split them into different directories like git? (Done as 901dbe5488260d4607a09c65397e80c2299cd9b1).
