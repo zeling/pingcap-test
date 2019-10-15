@@ -30,10 +30,10 @@ public:
         _memtables(std::make_unique<memtable_type[]>(n_shards)),
         _mem_usage_per_table(std::make_unique<size_t[]>(n_shards)),
         _epochs(std::make_unique<size_t[]>(n_shards)) {
-    size_t npage;
+    size_t npage, garbage;
     FILE *statm = fopen("/proc/self/statm", "r");
     assert(statm != NULL);
-    assert(fscanf(statm, "%lu", &npage) == 1);
+    assert(fscanf(statm, "%lu %lu", &garbage, &npage) == 2);
     _mem_usage = npage * getpagesize();
     assert(fclose(statm) == 0);
     for (int i = 0; i < _n_shards; i++) {
