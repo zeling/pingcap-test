@@ -79,9 +79,10 @@ the memtables and persist the file position of the input file onto the disk.
 
 ## Notes on testing
 The unit tests in `test_master.cpp` have some workload that mimics the whole execution of the program. So we can have
-some confidence that this works. Besides you can run the program on real inputs. I use a modified zipf-generator to generate
+some confidence that this works. Besides you can run the program on real inputs. I use a zipf-generator to generate
 URLs, the file is in `third_party/genzipf.c`. You can use `build/genzipf` to generate numbers. And you should be able to use
-`top100` to find the top-100 numbers are actuall 1 - 100 with decreasing frequences that respects the zipf(N, alpha) distribution.
+`top100` to find the top-100 numbers are actual 1 - 100 with decreasing frequences that respects the zipf(N, alpha) distribution. I don't have a powerful laptop, and I have very limited disk space, thus I didn't run the program on real
+100G input.
 
 ## Caveats and future improvement
 1. The URL is likely to share prefixes (e.g. http://www.), it might be benificial to make the keys in a SST share prefixes. 
@@ -92,3 +93,5 @@ URLs, the file is in `third_party/genzipf.c`. You can use `build/genzipf` to gen
    But it will make the program extremely complicated and will increse the # of reads to the file system significantly. I don't think 
    this is a good idea but maybe worth trying if I have enough time.
 3. Currently, The resource is limited as `RLIMIT_AS`, may be consider `RLIMIT_RSS`?
+4. There will be lots of "sst_files" in the same directory, this will bring problems when there are a lot of files.
+   May be split them into different directories like git?
