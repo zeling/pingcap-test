@@ -18,7 +18,7 @@ void master::on_new_url(std::string_view url) {
     _memtables[shard_no].insert({std::string(url), 1});
     // Update the memory usage in the memtable
     _mem_usage += estimate_map_entry_mem_usage(url);
-    //
+    _mem_usage_per_table[shard_no] += estimate_map_entry_mem_usage(url);
     if (_mem_usage > _mem_high_water_mark) {
       auto evict_shard =
           std::max_element(_mem_usage_per_table.get(),
@@ -72,6 +72,7 @@ size_t master::flush_memtable(size_t shard) {
         strerror(errno));
   }
   write_sst(std::move(_memtables[shard]), output);
+  assert(fclose(output) == 0);
   // Adjust the memory usage estimation.
   size_t saved = _mem_usage_per_table[shard];
   _mem_usage -= _mem_usage_per_table[shard];
