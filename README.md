@@ -38,7 +38,7 @@ The step 1 will generate the following files, with each a sorted string table.
 shard0: _0/sst-0 _0/sst-1
 shard1: _1/sst-0
 shard2:
-shard3: _2/sst-0 sst-1 sst-3
+shard3: _2/sst-0 _2/sst-1 _2/sst-3
 ```
 Then in step2, we use the `merge_iter<sst_read_iter>` over each shard's stage files to get top-k URLs per-shard.
 Finally we merge the results per shard to become the final result.
