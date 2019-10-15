@@ -1,4 +1,4 @@
-# Find Top 100 urls with limited memory.
+# Find Top 100 urls with limited memory
 
 ## Build and test instructions
 
@@ -35,10 +35,10 @@ that $water_mark < hard_limit$. `water_mark` has default of `0.9G` while `hard_l
 For example: 
 The step 1 will generate the following files, with each a sorted string table.
 ```
-shard0: sst-0-0 sst-0-1
-shard1: sst-1-0
+shard0: _0/sst-0 _0/sst-1
+shard1: _1/sst-0
 shard2:
-shard3: sst-2-0 sst-2-1 sst-2-3
+shard3: _2/sst-0 sst-1 sst-3
 ```
 Then in step2, we use the `merge_iter<sst_read_iter>` over each shard's stage files to get top-k URLs per-shard.
 Finally we merge the results per shard to become the final result.
@@ -81,8 +81,8 @@ the memtables and persist the file position of the input file onto the disk.
 The unit tests in `test_master.cpp` have some workload that mimics the whole execution of the program. So we can have
 some confidence that this works. Besides you can run the program on real inputs. I use a zipf-generator to generate
 URLs, the file is in `third_party/genzipf.c`. You can use `build/genzipf` to generate numbers. And you should be able to use
-`top100` to find the top-100 numbers are actual 1 - 100 with decreasing frequences that respects the zipf(N, alpha) distribution. I don't have a powerful laptop, and I have very limited disk space, thus I didn't run the program on real
-100G input.
+`top100` to find that the top-100 numbers are actual 1 - 100 with decreasing frequences that respects the zipf(N, alpha) distribution. I don't have a powerful laptop, and I have very limited disk space, thus I didn't run the program on real
+100G input (of course with lower memory limit). I have pre-generated a `test-urls-zipf` file using the zipf distribution.
 
 ## Caveats and future improvement
 1. The URL is likely to share prefixes (e.g. http://www.), it might be benificial to make the keys in a SST share prefixes. 
@@ -94,4 +94,4 @@ URLs, the file is in `third_party/genzipf.c`. You can use `build/genzipf` to gen
    this is a good idea but maybe worth trying if I have enough time.
 3. Currently, The resource is limited as `RLIMIT_AS`, may be consider `RLIMIT_RSS`?
 4. There will be lots of "sst_files" in the same directory, this will bring problems when there are a lot of files.
-   May be split them into different directories like git?
+   May be split them into different directories like git? (Done as 901dbe5488260d4607a09c65397e80c2299cd9b1).
