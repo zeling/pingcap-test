@@ -1,4 +1,5 @@
 #include <catch2/catch.hpp>
+
 #define private public
 #include "heap.h"
 #undef private

@@ -1,6 +1,5 @@
 #include <catch2/catch.hpp>
 #include <setjmp.h>
-#include <stdio.h>
 
 #include "memusage_guard.h"
 

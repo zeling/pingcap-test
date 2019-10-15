@@ -1,8 +1,9 @@
-#include "master.h"
-#include "iterator.h"
-#include "memusage_allocator.h"
 #include <algorithm>
 #include <stdarg.h>
+
+#include "iterator.h"
+#include "master.h"
+#include "memusage_allocator.h"
 
 void die(const char *fmt, ...);
 size_t get_entry_overhead();

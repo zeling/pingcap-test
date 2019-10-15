@@ -1,7 +1,7 @@
-#include "memusage_allocator.h"
 #include <catch2/catch.hpp>
-#include <iostream>
 #include <stdint.h>
+
+#include "memusage_allocator.h"
 
 size_t get_entry_overhead();
 

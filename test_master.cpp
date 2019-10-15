@@ -1,6 +1,7 @@
-#include "master.h"
 #include <catch2/catch.hpp>
 #include <stdio.h>
+
+#include "master.h"
 
 TEST_CASE("master", "[master spec]") {
   master::memtable_type result,

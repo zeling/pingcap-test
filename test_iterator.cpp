@@ -1,6 +1,7 @@
+#include <catch2/catch.hpp>
+
 #include "iterator.h"
 #include "master.h"
-#include <catch2/catch.hpp>
 
 template <typename Container> struct container_iterator : Container::iterator {
   Container &cont;

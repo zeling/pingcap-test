@@ -1,6 +1,7 @@
 #pragma once
-#include "types.h"
 #include <type_traits>
+
+#include "types.h"
 
 template <typename Url, bool min = true> struct entry {
   Url url;

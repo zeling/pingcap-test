@@ -1,21 +1,18 @@
 #pragma once
-#include "entry.h"
-#include "heap.h"
-#include "types.h"
-#include <assert.h>
-#include <fcntl.h>
-#include <iterator>
 #include <map>
 #include <memory>
 #include <mutex>
+#include <thread>
+#include <vector>
+
+#include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
-#include <string.h>
-#include <string>
-#include <string_view>
-#include <thread>
 #include <unistd.h>
-#include <vector>
+
+#include "entry.h"
+#include "heap.h"
+#include "types.h"
 
 class master {
 public:
